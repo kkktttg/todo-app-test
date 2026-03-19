@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wireframe: Kanban Todo</title>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  :root {
+    --w-bg: #f5f5f5;
+    --w-border: #ccc;
+    --w-text: #555;
+    --w-muted: #aaa;
+    --w-fill: #eee;
+  }
+
+  * {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    color: var(--w-text);
+  }
+
+  body { background: var(--w-bg); }
+
+  /* Screen nav */
+  nav { position: sticky; top: 0; z-index: 40; background: var(--w-bg); border-bottom: 1px solid var(--w-border); }
+  nav button { cursor: pointer; font-size: 13px; }
+  nav button:hover { background: var(--w-fill); border-radius: 4px; }
+  nav button.active { font-weight: bold; border-bottom: 2px solid var(--w-text); }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* Viewport toggle */
+  .vp-toggle button {
+    font-size: 12px; padding: 2px 8px;
+    border: 1px solid var(--w-border); cursor: pointer; background: white;
+  }
+  .vp-toggle button:first-child { border-radius: 4px 0 0 4px; }
+  .vp-toggle button:last-child { border-radius: 0 4px 4px 0; border-left: none; }
+  .vp-toggle button.active { background: var(--w-text); color: white; }
+
+  /* Mobile viewport frame */
+  body.viewport-mobile .screen-content {
+    max-width: 375px !important;
+    margin: 24px auto !important;
+    border: 2px solid var(--w-border);
+    border-radius: 24px;
+    min-height: 667px;
+    background: white;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    padding: 32px 16px !important;
+  }
+
+  /* Screen notes — AI annotation area */
+  .screen-notes {
+    background: #fffde7;
+    border-left: 3px solid #ffd54f;
+    padding: 12px 16px;
+    margin-bottom: 24px;
+    font-size: 13px;
+    border-radius: 0 4px 4px 0;
+  }
+  .screen-notes summary {
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 12px;
+    color: #b0a050;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .screen-notes p { margin: 6px 0 2px; color: #777; }
+  .screen-notes ul { margin: 4px 0 0 16px; padding: 0; color: #777; }
+  .screen-notes li { margin: 2px 0; }
+</style>
+</head>
+<body class="p-0 m-0 viewport-desktop">
+
+<nav class="flex items-center gap-4 px-6 py-2">
+  <span class="text-xs" style="color:var(--w-muted)">wireframe</span>
+  <button id="nav-0" onclick="show(0)" class="px-2 py-1">Default</button>
+  <button id="nav-1" onclick="show(1)" class="px-2 py-1">Card Create</button>
+  <button id="nav-2" onclick="show(2)" class="px-2 py-1">Card Detail</button>
+  <button id="nav-3" onclick="show(3)" class="px-2 py-1">Search/Filter</button>
+  <button id="nav-4" onclick="show(4)" class="px-2 py-1">Delete Confirm</button>
+  <button id="nav-5" onclick="show(5)" class="px-2 py-1">Dark Mode</button>
+  <div class="vp-toggle flex ml-auto">
+    <button id="vp-desktop" onclick="setViewport('desktop')" class="active">Desktop</button>
+    <button id="vp-mobile" onclick="setViewport('mobile')">Mobile</button>
+  </div>
+</nav>
+
+<!-- ============================================================ -->
+<!-- Screen 0: Default — 기본 화면 -->
+<!-- ============================================================ -->
+<div id="screen-0" class="screen">
+  <div class="screen-content @container max-w-6xl mx-auto p-6">
+
+    <h2 class="text-lg font-bold mb-5" style="color:var(--w-muted); border-bottom:1px solid var(--w-border); padding-bottom:8px;">
+      Default — 칸반 보드
+    </h2>
+
+    <!-- App Header -->
+    <div class="flex flex-col @md:flex-row @md:items-center gap-3 mb-5">
+      <h1 class="text-base font-bold flex items-center gap-2">
+        <i data-lucide="kanban" style="width:20px;height:20px;"></i>
+        Kanban Todo
+      </h1>
+      <div class="flex items-center gap-2 @md:ml-auto">
+        <!-- Search -->
+        <div class="flex items-center border rounded px-3 py-1.5 gap-2" style="border-color:var(--w-border); background:var(--w-fill);">
+          <i data-lucide="search" style="width:16px;height:16px;flex-shrink:0;"></i>
+          <input class="w-full text-sm border-0 outline-none" style="background:transparent; color:var(--w-muted); min-width:140px;" placeholder="Search cards..." disabled>
+        </div>
+        <!-- Priority Filter -->
+        <div class="border rounded px-3 py-1.5 text-sm flex items-center justify-between gap-2" style="border-color:var(--w-border); background:var(--w-fill); min-width:100px;">
+          <span style="color:var(--w-muted)">Priority</span>
+          <span style="color:var(--w-muted)">▾</span>
+        </div>
+        <!-- Tag Filter -->
+        <div class="border rounded px-3 py-1.5 text-sm flex items-center justify-between gap-2" style="border-color:var(--w-border); background:var(--w-fill); min-width:80px;">
+          <span style="color:var(--w-muted)">Tags</span>
+          <span style="color:var(--w-muted)">▾</span>
+        </div>
+        <!-- Dark Mode Toggle -->
+        <div class="flex items-center gap-1.5">
+          <i data-lucide="sun" style="width:14px;height:14px;color:var(--w-muted);"></i>
+          <div class="border rounded-full" style="width:32px;height:16px;background:var(--w-fill);border-color:var(--w-border);position:relative;">
+            <div style="width:12px;height:12px;border-radius:50%;background:white;border:1px solid var(--w-border);position:absolute;top:1px;left:2px;"></div>
+          </div>
+          <i data-lucide="moon" style="width:14px;height:14px;color:var(--w-muted);"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Board: 3 Columns -->
+    <div class="flex flex-col @md:flex-row gap-4 items-start">
+
+      <!-- Column: Todo -->
+      <div class="border rounded-lg flex-1 w-full @md:w-auto" style="border-color:var(--w-border); background:white; min-width:0;">
+        <div class="flex items-center justify-between px-4 py-3" style="border-bottom:1px solid var(--w-border);">
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-bold">Todo</span>
+            <span class="border rounded-full px-2 text-xs" style="border-color:var(--w-border); background:var(--w-fill)">3</span>
+          </div>
+          <div class="flex items-center gap-1">
+            <button class="border rounded p-1 text-sm" style="border-color:var(--w-border); background:var(--w-fill)" disabled><i data-lucide="pencil" style="width:12px;height:12px;"></i></button>
+            <button class="border rounded p-1 text-sm" style="border-color:var(--w-border); background:var(--w-fill)" disabled><i data-lucide="trash-2" style="width:12px;height:12px;"></i></button>
+          </div>
+        </div>
+        <div class="p-3 flex flex-col gap-3">
+
+          <!-- Card 1: with cover image -->
+          <div class="border rounded-lg overflow-hidden" style="border-color:var(--w-border); background:white;">
+            <div class="rounded-t-lg" style="height:48px; background:var(--w-fill); display:flex; align-items:center; justify-content:center;">
+              <i data-lucide="image" style="width:20px;height:20px;color:var(--w-muted);"></i>
+            </div>
+            <div class="p-3">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="border rounded-full px-2 text-xs font-bold" style="border-color:var(--w-border); background:var(--w-fill)">High</span>
+              </div>
+              <h3 class="text-sm font-bold">API 설계</h3>
+              <p class="text-xs mt-0.5" style="color:var(--w-muted)">REST 엔드포인트 정의</p>
+              <div class="flex flex-wrap gap-1 mt-2">
+                <span class="border rounded-full px-2 text-xs" style="border-color:var(--w-border); background:var(--w-fill)">Backend</span>
+                <span class="border rounded-full px-2 text-xs" style="border-color:var(--w-border); background:var(--w-fill)">Urgent</span>
+              </div>
+              <div class="flex items-center gap-3 mt-2 text-xs" style="color:var(--w-muted);">
+                <span class="flex items-center gap-1"><i data-lucide="calendar" style="width:12px;height:12px;"></i> 2026-04-01</span>
+                <span class="flex items-center gap-1"><i data-lucide="user" style="width:12px;height:12px;"></i> 김개발</span>
+              </div>
+              <div class="flex items-center gap-2 mt-2">
+                <div class="flex-1 rounded-full overflow-hidden" style="height:4px; background:var(--w-fill)">
+                  <div class="rounded-full" style="height:100%; width:66%; background:var(--w-border)"></div>
+                </div>
+                <span class="text-xs" style="color:var(--w-muted)">2/3</span>
+              </div>
+              <div class="flex items-center justify-between mt-2 text-xs" style="color:var(--w-muted);">
+                <span>2026-03-19</span>
+                <button class="border rounded p-1" style="border-color:var(--w-border); background:var(--w-fill)" disabled><i data-lucide="trash-2" style="width:10px;height:10px;"></i></button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2: minimal -->
+          <div class="border rounded-lg overflow-hidden" style="border-color:var(--w-border); background:white;">
+            <div class="p-3">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="border rounded-full px-2 text-xs" style="border-color:var(--w-border); background:var(--w-fill)">Medium</span>
+              </div>
+              <h3 class="text-sm font-bold">DB 설계</h3>
+              <p class="text-xs mt-0.5" style="color:var(--w-muted)">스키마 정의 및 마이그레이션</p>
+              <div class="flex flex-wrap gap-1 mt-2">
+                <span class="border rounded-full px-2 text-xs" style="border-color:var(--w-border); background:var(--w-fill)">Backend</span>
+              </div>
+              <div class="flex items-center gap-3 mt-2 text-xs" style="color:var(--w-muted);">
+                <span class="flex items-center gap-1"><i data-lucide="calendar" style="width:12px;height:12px;"></i> 2026-04-05</span>
+                <span class="flex items-center gap-1"><i data-lucide="user" style="width:12px;height:12px;"></i> 이백엔</span>
+              </div>
+              <div class="flex items-center justify-between mt-2 text-xs" style="color:var(--w-muted);">
+                <span>2026-03-18</span>
+                <button class="border rounded p-1" style="border-color:var(--w-border); background:var(--w-fill)" disabled><i data-lucide="trash-2" style="width:10px;height:10px;"></i></button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 3 -->
+          <div class="border rounded-lg overflow-hidden" style="border-color:var(--w-border); background:white;">
+            <div class="p-3">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="border rounded-full px-2 text-xs" style="border-color:var(--w-border); background:var(--w-fill)">Low</span>
+              </div>
+              <h3 class="text-sm font-bold">README 작성</h3>
+              <p class="text-xs mt-0.5" style="color:var(--w-muted)">프로젝트 문서화</p>
+              <div class="flex items-center justify-between mt-2 text-xs" style="color:var(--w-muted);">
+                <span>2026-03-19</span>
+                <button class="border rounded p-1" style="border-color:var(--w-border); background:var(--w-fill)" disabled><i data-lucide="trash-2" style="width:10px;height:10px;"></i></button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Add Card Button -->
+          <button class="border-2 border-dashed rounded-lg py-2 flex items-center justify-center gap-1 text-sm" style="border-color:var(--w-border); color:var(--w-muted);" disabled>
+            <i data-lucide="plus" style="width:14px;height:14px;"></i> Add Card
+          </button>
+        </div>
+      </div>
+
+      <!-- Column: In Progress -->
+      <div class="border rounded-lg flex-1 w-full @md:w-auto" style="border-color:var(--w-border); background:white; min-width:0;">
+        <div class="flex items-center justify-between px-4 py-3" style="border-bottom:1px solid var(--w-border);">
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-bold">In Progress</span>
+            <span class="border rounded-full px-2 text-xs" style="border-color:var(--w-border); background:var(--w-fill)">2</span>
+          </div>
+          <div class="flex items-center gap-1">
+            <button class="border rounded p-1 text-sm" style="border-color:var(--w-border); background:var(--w-fill)" disabled><i data-lucide="pencil" style="width:12px;height:12px;"></i></button>
+            <button class="border rounded p-1 text-sm" style="border-color:var(--w-border); background:var(--w-fill)" disabled><i data-lucide="trash-2" style="width:12px;height:12px;"></i></button>
+          </div>
+        </div>
+        <div class="p-3 flex flex-col gap-3">
+
+          <!-- Card -->
+          <div class="border rounded-lg overflow-hidden" style="border-color:var(--w-border); background:white;">
+            <div class="p-3">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="border rounded-full px-2 text-xs font-bold" style="border-color:var(--w-border); background:var(--w-fill)">High</span>
+              </div>
+              <h3 class="text-sm font-bold">화면 디자인</h3>
+              <p class="text-xs mt-0.5" style="color:var(--w-muted)">Figma 시안 작업</p>
+              <div class="flex flex-wrap gap-1 mt-2">
+                <span class="border rounded-full px-2 text-xs" style="border-color:var(--w-border); background:var(--w-fill)">Frontend</span>
+              </div>
+              <div class="flex items-center gap-3 mt-2 text-xs" style="color:var(--w-muted);">
+                <span class="flex items-center gap-1"><i data-lucide="calendar" style="width:12px;height:12px;"></i> 2026-03-25</span>
+                <span class="flex items-center gap-1"><i data-lucide="user" style="width:12px;height:12px;"></i> 박프론</span>
+              </div>
+              <div class="flex items-center gap-2 mt-2">
+                <div class="flex-1 rounded-full overflow-hidden" style="height:4px; background:var(--w-fill)">
+                  <div class="rounded-full" style="height:100%; width:50%; background:var(--w-border)"></div>
+                </div>
+                <span class="text-xs" style="color:var(--w-muted)">1/2</span>
+              </div>
+              <div class="flex items-center justify-between mt-2 text-xs" style="color:var(--w-muted);">
+                <span>2026-03-17</span>
+                <button class="border rounded p-1" style="border-color:var(--w-border); background:var(--w-fill)" disabled><i data-lucide="trash-2" style="width:10px;height:10px;"></i></button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card -->
+          <div class="border rounded-lg overflow-hidden" style="border-color:var(--w-border); background:white;">
+            <div class="p-3">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="border rounded-full px-2 text-xs" style="border-color:var(--w-border); background:var(--w-fill)">Medium</span>
+              </div>
+              <h3 class="text-sm font-bold">인증 모듈 구현</h3>
+              <p class="text-xs mt-0.5" style="color:var(--w-muted)">JWT 기반 인증</p>
+              <div class="flex flex-wrap gap-1 mt-2">
+                <span class="border rounded-full px-2 text-xs" style="border-color:var(--w-border); background:var(--w-fill)">Backend</span>
+              </div>
+              <div class="flex items-center gap-3 mt-2 text-xs" style="color:var(--w-muted);">
+                <span class="flex items-center gap-1"><i data-lucide="user" style="width:12px;height:12px;"></i> 김개발</span>
+              </div>
+              <div class="flex items-center justify-between mt-2 text-xs" style="color:var(--w-muted);">
+                <span>2026-03-16</span>
+                <button class="border rounded p-1" style="border-color:var(--w-border); background:var(--w-fill)" disabled><i data-lucide="trash-2" style="width:10px;height:10px;"></i></button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Add Card Button -->
+          <button class="border-2 border-dashed rounded-lg py-2 flex items-center justify-center gap-1 text-sm" style="border-color:var(--w-border); color:var(--w-muted);" disabled>
+            <i data-lucide="plus" style="width:14px;height:14px;"></i> Add Card
+          </button>
+        </div>
+      </div>
+
+      <!-- Column: Done -->
+      <div class="border rounded-lg flex-1 w-full @md:w-auto" style="border-color:var(--w-border); background:white; min-width:0;">
+        <div class="flex items-center justify-between px-4 py-3" style="border-bottom:1px solid var(--w-border);">
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-bold">Done</span>
+            <span class="border rounded-full px-2 text-xs" style="border-color:var(--w-border); background:var(--w-fill)">1</span>
+          </div>
+          <div class="flex items-center gap-1">
+            <button class="border rounded p-1 text-sm" style="border-color:var(--w-border); background:var(--w-fill)" disabled><i data-lucide="pencil" style="width:12px;height:12px;"></i></button>
+            <button class="border rounded p-1 text-sm" style="border-color:var(--w-border); background:var(--w-fill)" disabled><i data-lucide="trash-2" style="width:12px;height:12px;"></i></button>
+          </div>
+        </div>
+        <div class="p-3 flex flex-col gap-3">
+
+          <!-- Card -->
+          <div class="border rounded-lg overflow-hidden" style="border-color:var(--w-border); background:white;">
+            <div class="p-3">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="border rounded-full px-2 text-xs" style="border-color:var(--w-border); background:var(--w-fill)">Medium</span>
+              </div>
+              <h3 class="text-sm font-bold" style="text-decoration:line-through; color:var(--w-muted);">프로젝트 초기 설정</h3>
+              <p class="text-xs mt-0.5" style="color:var(--w-muted)">Next.js + shadcn 세팅</p>
+              <div class="flex flex-wrap gap-1 mt-2">
+                <span class="border rounded-full px-2 text-xs" style="border-color:var(--w-border); background:var(--w-fill)">DevOps</span>
+              </div>
+              <div class="flex items-center gap-2 mt-2">
+                <div class="flex-1 rounded-full overflow-hidden" style="height:4px; background:var(--w-fill)">
+                  <div class="rounded-full" style="height:100%; width:100%; background:var(--w-border)"></div>
+                </div>
+                <span class="text-xs" style="color:var(--w-muted)">3/3</span>
+              </div>
+              <div class="flex items-center justify-between mt-2 text-xs" style="color:var(--w-muted);">
+                <span>2026-03-15</span>
+                <button class="border rounded p-1" style="border-color:var(--w-border); background:var(--w-fill)" disabled><i data-lucide="trash-2" style="width:10px;height:10px;"></i></button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Add Card Button -->
+          <button class="border-2 border-dashed rounded-lg py-2 flex items-center justify-center gap-1 text-sm" style="border-color:var(--w-border); color:var(--w-muted);" disabled>
+            <i data-lucide="plus" style="width:14px;height:14px;"></i> Add Card
+          </button>
+        </div>
+      </div>
+
+      <!-- Add Column Button -->
+      <div class="flex-shrink-0 w-full @md:w-auto" style="min-width:200px;">
+        <button class="border-2 border-dashed rounded-lg w-full py-8 flex items-center justify-center gap-1 text-sm" style="border-color:var(--w-border); color:var(--w-muted);" disabled>
+          <i data-lucide="plus" style="width:14px;height:14px;"></i> Add Column
+        </button>
+      </div>
+    </div>
+
+    <div class="screen-notes mt-6">
+      <details open>
+        <summary>Notes</summary>
+        <p>대표 데이터가 채워진 칸반 보드의 기본 상태. 상호작용 없음.</p>
+        <ul>
+          <li>레이아웃: 3칼럼(Todo/In Progress/Done) + 칼럼 추가 버튼</li>
+          <li>카드 구성: 커버이미지, 우선순위 뱃지, 제목, 설명, 태그, 마감일, 담당자, 서브태스크 진행률, 생성일, 삭제 버튼</li>
+          <li>헤더: 앱 타이틀, 검색창, 우선순위/태그 필터 드롭다운, 다크모드 토글</li>
+          <li>칼럼 헤더: 칼럼명, 카드 수 뱃지, 이름편집/삭제 버튼</li>
+          <li>반응형: Desktop=가로 3칼럼, Mobile=세로 스택</li>
+        </ul>
+      </details>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- Screen 1: Card Create — 카드 생성 폼 -->
+<!-- ============================================================ -->
+<div id="screen-1" class="screen">
+  <div class="screen-content @container max-w-6xl mx-auto p-6">
+
+    <h2 class="text-lg font-bold mb-5" style="color:var(--w-muted); border-bottom:1px solid var(--w-border); padding-bottom:8px;">
+      Card Create — 카드 생성 폼
+    </h2>
+
+    <!-- Modal overlay -->
+    <div class="rounded-lg" style="position:relative; min-height:550px; background:rgba(0,0,0,0.1); display:flex; align-items:center; justify-content:center;">
+      <div class="border rounded-lg w-full" style="border-color:var(--w-border); background:white; max-width:480px;">
+        <!-- Header -->
+        <div class="flex items-center justify-between px-5 py-3" style="border-bottom:1px solid var(--w-border);">
+          <span class="text-sm font-bold">New Card — Todo</span>
+          <span style="cursor:pointer; color:var(--w-muted)"><i data-lucide="x" style="width:16px;height:16px;"></i></span>
+        </div>
+        <!-- Body -->
+        <div class="p-5 flex flex-col gap-4">
+          <!-- Title -->
+          <div>
+            <label class="text-xs" style="color:var(--w-muted)">Title *</label>
+            <input class="w-full border rounded px-3 py-1.5 text-sm mt-1" style="border-color:var(--w-border); background:var(--w-fill)" value="API 설계" disabled>
+          </div>
+          <!-- Description -->
+          <div>
+            <label class="text-xs" style="color:var(--w-muted)">Description</label>
+            <textarea class="w-full border rounded px-3 py-2 text-sm mt-1" rows="2" style="border-color:var(--w-border); background:var(--w-fill); resize:none;" disabled>REST 엔드포인트 정의</textarea>
+          </div>
+          <!-- Priority + Due Date row -->
+          <div class="flex gap-3">
+            <div class="flex-1">
+              <label class="text-xs" style="color:var(--w-muted)">Priority</label>
+              <div class="border rounded px-3 py-1.5 text-sm flex items-center justify-between mt-1" style="border-color:var(--w-border); background:var(--w-fill)">
+                <span>High</span>
+                <span style="color:var(--w-muted)">▾</span>
+              </div>
+            </div>
+            <div class="flex-1">
+              <label class="text-xs" style="color:var(--w-muted)">Due Date</label>
+              <input class="w-full border rounded px-3 py-1.5 text-sm mt-1" style="border-color:var(--w-border); background:var(--w-fill)" value="2026-04-01" disabled>
+            </div>
+          </div>
+          <!-- Assignee -->
+          <div>
+            <label class="text-xs" style="color:var(--w-muted)">Assignee</label>
+            <input class="w-full border rounded px-3 py-1.5 text-sm mt-1" style="border-color:var(--w-border); background:var(--w-fill)" value="김개발" disabled>
+          </div>
+          <!-- Tags -->
+          <div>
+            <label class="text-xs" style="color:var(--w-muted)">Tags</label>
+            <div class="flex flex-wrap gap-1 mt-1">
+              <span class="border rounded-full px-2 text-xs" style="border-color:var(--w-border); background:var(--w-fill)">Backend ✕</span>
+              <span class="border rounded-full px-2 text-xs" style="border-color:var(--w-border); background:var(--w-fill)">Urgent ✕</span>
+              <button class="border rounded-full px-2 text-xs" style="border-color:var(--w-border); background:var(--w-fill); color:var(--w-muted);" disabled>+ Add</button>
+            </div>
+          </div>
+          <!-- Cover Image URL -->
+          <div>
+            <label class="text-xs" style="color:var(--w-muted)">Cover Image URL</label>
+            <input class="w-full border rounded px-3 py-1.5 text-sm mt-1" style="border-color:var(--w-border); background:var(--w-fill); color:var(--w-muted)" placeholder="https://..." disabled>
+          </div>
+        </div>
+        <!-- Footer -->
+        <div class="flex justify-end gap-2 px-5 py-3" style="border-top:1px solid var(--w-border);">
+          <button class="border rounded px-3 py-1 text-sm" style="border-color:var(--w-border); background:var(--w-fill)" disabled>Cancel</button>
+          <button class="border rounded px-3 py-1 text-sm font-bold" style="border-color:var(--w-text); background:var(--w-fill)" disabled>Create</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Validation error state -->
+    <div class="mt-6">
+      <h3 class="text-sm font-bold mb-3" style="color:var(--w-muted);">Validation Error State</h3>
+      <div class="border rounded-lg" style="border-color:var(--w-border); background:white; max-width:480px;">
+        <div class="p-5">
+          <label class="text-xs" style="color:var(--w-muted)">Title *</label>
+          <input class="w-full border rounded px-3 py-1.5 text-sm mt-1" style="border-color:#e57373; background:var(--w-fill); color:var(--w-muted)" placeholder="Enter title..." disabled>
+          <p class="text-xs mt-1" style="color:#e57373;">제목을 입력해주세요</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen-notes mt-6">
+      <details open>
+        <summary>Notes</summary>
+        <p>칼럼의 "Add Card" 버튼 클릭 시 모달로 표시. KANBAN-006~011 시나리오 커버.</p>
+        <ul>
+          <li>KANBAN-006: 제목+설명 입력 후 생성 → 해당 칼럼에 카드 표시</li>
+          <li>KANBAN-007: 빈 제목 → "제목을 입력해주세요" 오류 메시지</li>
+          <li>KANBAN-008: 우선순위 High 선택 → High 뱃지</li>
+          <li>KANBAN-009: 마감일 2026-04-01 설정</li>
+          <li>KANBAN-010: 담당자 "김개발" 텍스트 입력</li>
+          <li>KANBAN-011: 커버 이미지 URL 입력 → 카드 상단 이미지</li>
+        </ul>
+      </details>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- Screen 2: Card Detail — 인라인 편집 + 서브태스크 + 태그 -->
+<!-- ============================================================ -->
+<div id="screen-2" class="screen">
+  <div class="screen-content @container max-w-6xl mx-auto p-6">
+
+    <h2 class="text-lg font-bold mb-5" style="color:var(--w-muted); border-bottom:1px solid var(--w-border); padding-bottom:8px;">
+      Card Detail — 인라인 편집 + 서브태스크 + 태그
+    </h2>
+
+    <!-- Card detail expanded view -->
+    <div class="flex flex-col @md:flex-row gap-6">
+
+      <!-- Left: Card Content (editable) -->
+      <div class="flex-1 border rounded-lg" style="border-color:var(--w-border); background:white;">
+        <!-- Cover image area -->
+        <div class="rounded-t-lg" style="height:80px; background:var(--w-fill); display:flex; align-items:center; justify-content:center;">
+          <i data-lucide="image" style="width:24px;height:24px;color:var(--w-muted);"></i>
+        </div>
+        <div class="p-5 flex flex-col gap-4">
+          <!-- Title: inline editing state -->
+          <div>
+            <label class="text-xs" style="color:var(--w-muted)">Title (click to edit)</label>
+            <input class="w-full border-2 rounded px-3 py-1.5 text-sm font-bold mt-1" style="border-color:var(--w-text); background:white;" value="API 문서화" disabled>
+            <p class="text-xs mt-1" style="color:var(--w-muted)">Escape to cancel, Enter to save</p>
+          </div>
+          <!-- Description: inline editing state -->
+          <div>
+            <label class="text-xs" style="color:var(--w-muted)">Description (click to edit)</label>
+            <textarea class="w-full border-2 rounded px-3 py-2 text-sm mt-1" rows="2" style="border-color:var(--w-text); background:white; resize:none;" disabled>GraphQL 스키마 정의</textarea>
+          </div>
+          <!-- Priority: select -->
+          <div>
+            <label class="text-xs" style="color:var(--w-muted)">Priority</label>
+            <div class="border rounded px-3 py-1.5 text-sm flex items-center justify-between mt-1" style="border-color:var(--w-border); background:var(--w-fill)">
+              <span>Low</span>
+              <span style="color:var(--w-muted)">▾</span>
+            </div>
+          </div>
+          <!-- Assignee + Due Date -->
+          <div class="flex gap-3">
+            <div class="flex-1">
+              <label class="text-xs" style="color:var(--w-muted)">Assignee</label>
+              <input class="w-full border rounded px-3 py-1.5 text-sm mt-1" style="border-color:var(--w-border); background:var(--w-fill)" value="김개발" disabled>
+            </div>
+            <div class="flex-1">
+              <label class="text-xs" style="color:var(--w-muted)">Due Date</label>
+              <input class="w-full border rounded px-3 py-1.5 text-sm mt-1" style="border-color:var(--w-border); background:var(--w-fill)" value="2026-04-01" disabled>
+            </div>
+          </div>
+          <!-- Timestamps -->
+          <div class="flex gap-4 text-xs" style="color:var(--w-muted);">
+            <span>Created: 2026-03-19</span>
+            <span>Modified: 2026-03-19</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Subtasks + Tags -->
+      <div class="w-full @md:w-80 flex flex-col gap-4">
+
+        <!-- Subtasks -->
+        <div class="border rounded-lg" style="border-color:var(--w-border); background:white;">
+          <div class="flex items-center justify-between px-4 py-3" style="border-bottom:1px solid var(--w-border);">
+            <span class="text-sm font-bold">Subtasks</span>
+            <span class="text-xs" style="color:var(--w-muted)">2/3</span>
+          </div>
+          <div class="p-4 flex flex-col gap-2">
+            <div class="flex items-center gap-2">
+              <input type="checkbox" checked disabled>
+              <span class="text-sm line-through" style="color:var(--w-muted)">DB 스키마 작성</span>
+              <button class="ml-auto border rounded p-0.5" style="border-color:var(--w-border); background:var(--w-fill)" disabled><i data-lucide="trash-2" style="width:10px;height:10px;"></i></button>
+            </div>
+            <div class="flex items-center gap-2">
+              <input type="checkbox" checked disabled>
+              <span class="text-sm line-through" style="color:var(--w-muted)">엔드포인트 목록 정리</span>
+              <button class="ml-auto border rounded p-0.5" style="border-color:var(--w-border); background:var(--w-fill)" disabled><i data-lucide="trash-2" style="width:10px;height:10px;"></i></button>
+            </div>
+            <div class="flex items-center gap-2">
+              <input type="checkbox" disabled>
+              <span class="text-sm">Swagger 문서 생성</span>
+              <button class="ml-auto border rounded p-0.5" style="border-color:var(--w-border); background:var(--w-fill)" disabled><i data-lucide="trash-2" style="width:10px;height:10px;"></i></button>
+            </div>
+            <!-- Add subtask -->
+            <div class="flex items-center gap-2 mt-1">
+              <input class="flex-1 border rounded px-3 py-1 text-sm" style="border-color:var(--w-border); background:var(--w-fill); color:var(--w-muted)" placeholder="Add subtask..." disabled>
+              <button class="border rounded p-1 text-sm" style="border-color:var(--w-border); background:var(--w-fill)" disabled><i data-lucide="plus" style="width:14px;height:14px;"></i></button>
+            </div>
+          </div>
+          <div class="px-4 pb-3">
+            <div class="flex items-center gap-2">
+              <div class="flex-1 rounded-full overflow-hidden" style="height:4px; background:var(--w-fill)">
+                <div class="rounded-full" style="height:100%; width:66%; background:var(--w-border)"></div>
+              </div>
+              <span class="text-xs" style="color:var(--w-muted)">2/3</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tags -->
+        <div class="border rounded-lg" style="border-color:var(--w-border); background:white;">
+          <div class="flex items-center justify-between px-4 py-3" style="border-bottom:1px solid var(--w-border);">
+            <span class="text-sm font-bold">Tags</span>
+          </div>
+          <div class="p-4 flex flex-col gap-3">
+            <!-- Current tags -->
+            <div class="flex flex-wrap gap-1">
+              <span class="border rounded-full px-2 text-xs" style="border-color:var(--w-border); background:var(--w-fill)">Backend ✕</span>
+              <span class="border rounded-full px-2 text-xs" style="border-color:var(--w-border); background:var(--w-fill)">Urgent ✕</span>
+            </div>
+            <!-- Tag selector -->
+            <div>
+              <label class="text-xs" style="color:var(--w-muted)">Add tag</label>
+              <div class="border rounded px-3 py-1.5 text-sm flex items-center justify-between mt-1" style="border-color:var(--w-border); background:var(--w-fill)">
+                <span style="color:var(--w-muted)">Select tag...</span>
+                <span style="color:var(--w-muted)">▾</span>
+              </div>
+            </div>
+            <!-- Create new tag -->
+            <div style="border-top:1px solid var(--w-border); padding-top:12px;">
+              <label class="text-xs" style="color:var(--w-muted)">Create new tag</label>
+              <div class="flex items-center gap-2 mt-1">
+                <input class="flex-1 border rounded px-3 py-1 text-sm" style="border-color:var(--w-border); background:var(--w-fill); color:var(--w-muted)" placeholder="Tag name..." disabled>
+                <!-- Color picker simplified -->
+                <div class="flex gap-1">
+                  <div style="width:16px;height:16px;border-radius:50%;background:#90caf9;border:2px solid var(--w-text);"></div>
+                  <div style="width:16px;height:16px;border-radius:50%;background:#a5d6a7;border:1px solid var(--w-border);"></div>
+                  <div style="width:16px;height:16px;border-radius:50%;background:#ef9a9a;border:1px solid var(--w-border);"></div>
+                  <div style="width:16px;height:16px;border-radius:50%;background:#fff59d;border:1px solid var(--w-border);"></div>
+                </div>
+                <button class="border rounded p-1 text-sm" style="border-color:var(--w-border); background:var(--w-fill)" disabled><i data-lucide="plus" style="width:14px;height:14px;"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="screen-notes mt-6">
+      <details open>
+        <summary>Notes</summary>
+        <p>카드 클릭 시 확장 뷰로 표시. 인라인 편집, 서브태스크, 태그 관리를 통합.</p>
+        <ul>
+          <li>KANBAN-012: 제목 클릭 → 입력란으로 전환, "API 문서화"로 수정</li>
+          <li>KANBAN-043: 설명 클릭 → 텍스트 영역으로 전환, "GraphQL 스키마 정의"로 수정</li>
+          <li>KANBAN-013: 우선순위 High→Low 변경</li>
+          <li>KANBAN-014: Escape 키로 편집 취소</li>
+          <li>KANBAN-017~020: 서브태스크 추가/체크/삭제, 진행률 2/3 표시</li>
+          <li>KANBAN-024: 새 태그 생성 시 색상 선택</li>
+          <li>KANBAN-025~027: 카드에 태그 추가/제거, 복수 태그 지원</li>
+          <li>KANBAN-041~042: 생성일/수정일 자동 표시</li>
+        </ul>
+      </details>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- Screen 3: Search/Filter — 검색·필터 적용 -->
+<!-- ============================================================ -->
+<div id="screen-3" class="screen">
+  <div class="screen-content @container max-w-6xl mx-auto p-6">
+
+    <h2 class="text-lg font-bold mb-5" style="color:var(--w-muted); border-bottom:1px solid var(--w-border); padding-bottom:8px;">
+      Search / Filter — 검색·필터 적용
+    </h2>
+
+    <!-- App Header with active search + filter -->
+    <div class="flex flex-col @md:flex-row @md:items-center gap-3 mb-5">
+      <h1 class="text-base font-bold flex items-center gap-2">
+        <i data-lucide="kanban" style="width:20px;height:20px;"></i>
+        Kanban Todo
+      </h1>
+      <div class="flex items-center gap-2 @md:ml-auto">
+        <!-- Active search -->
+        <div class="flex items-center border-2 rounded px-3 py-1.5 gap-2" style="border-color:var(--w-text); background:white;">
+          <i data-lucide="search" style="width:16px;height:16px;flex-shrink:0;"></i>
+          <input class="w-full text-sm border-0 outline-none" style="background:transparent; min-width:140px;" value="API" disabled>
+          <span style="color:var(--w-muted); cursor:pointer;"><i data-lucide="x" style="width:14px;height:14px;"></i></span>
+        </div>
+        <!-- Active Priority Filter -->
+        <div class="border-2 rounded px-3 py-1.5 text-sm flex items-center justify-between gap-2" style="border-color:var(--w-text); background:white; min-width:100px;">
+          <span class="font-bold">High</span>
+          <span style="color:var(--w-muted)"><i data-lucide="x" style="width:12px;height:12px;"></i></span>
+        </div>
+        <!-- Tag Filter (inactive) -->
+        <div class="border rounded px-3 py-1.5 text-sm flex items-center justify-between gap-2" style="border-color:var(--w-border); background:var(--w-fill); min-width:80px;">
+          <span style="color:var(--w-muted)">Tags</span>
+          <span style="color:var(--w-muted)">▾</span>
+        </div>
+        <!-- Dark Mode Toggle -->
+        <div class="flex items-center gap-1.5">
+          <i data-lucide="sun" style="width:14px;height:14px;color:var(--w-muted);"></i>
+          <div class="border rounded-full" style="width:32px;height:16px;background:var(--w-fill);border-color:var(--w-border);position:relative;">
+            <div style="width:12px;height:12px;border-radius:50%;background:white;border:1px solid var(--w-border);position:absolute;top:1px;left:2px;"></div>
+          </div>
+          <i data-lucide="moon" style="width:14px;height:14px;color:var(--w-muted);"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active filters indicator -->
+    <div class="flex items-center gap-2 mb-4">
+      <span class="text-xs" style="color:var(--w-muted)">Active filters:</span>
+      <span class="border rounded-full px-2 text-xs" style="border-color:var(--w-border); background:var(--w-fill)">Search: "API" ✕</span>
+      <span class="border rounded-full px-2 text-xs" style="border-color:var(--w-border); background:var(--w-fill)">Priority: High ✕</span>
+      <button class="text-xs" style="color:var(--w-muted); text-decoration:underline;" disabled>Clear all</button>
+    </div>
+
+    <!-- Filtered Board: only matching cards shown -->
+    <div class="flex flex-col @md:flex-row gap-4 items-start">
+
+      <!-- Column: Todo — 1 match -->
+      <div class="border rounded-lg flex-1 w-full @md:w-auto" style="border-color:var(--w-border); background:white; min-width:0;">
+        <div class="flex items-center justify-between px-4 py-3" style="border-bottom:1px solid var(--w-border);">
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-bold">Todo</span>
+            <span class="border rounded-full px-2 text-xs" style="border-color:var(--w-border); background:var(--w-fill)">1</span>
+          </div>
+        </div>
+        <div class="p-3 flex flex-col gap-3">
+          <!-- Matched card -->
+          <div class="border rounded-lg overflow-hidden" style="border-color:var(--w-border); background:white;">
+            <div class="p-3">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="border rounded-full px-2 text-xs font-bold" style="border-color:var(--w-border); background:var(--w-fill)">High</span>
+              </div>
+              <h3 class="text-sm font-bold">API 설계</h3>
+              <p class="text-xs mt-0.5" style="color:var(--w-muted)">REST 엔드포인트 정의</p>
+              <div class="flex flex-wrap gap-1 mt-2">
+                <span class="border rounded-full px-2 text-xs" style="border-color:var(--w-border); background:var(--w-fill)">Backend</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Column: In Progress — 0 match -->
+      <div class="border rounded-lg flex-1 w-full @md:w-auto" style="border-color:var(--w-border); background:white; min-width:0; opacity:0.6;">
+        <div class="flex items-center justify-between px-4 py-3" style="border-bottom:1px solid var(--w-border);">
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-bold">In Progress</span>
+            <span class="border rounded-full px-2 text-xs" style="border-color:var(--w-border); background:var(--w-fill)">0</span>
+          </div>
+        </div>
+        <div class="p-3">
+          <div class="border-2 border-dashed rounded flex flex-col items-center justify-center p-6 gap-2" style="border-color:var(--w-border); color:var(--w-muted)">
+            <p class="text-xs">No matching cards</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Column: Done — 0 match -->
+      <div class="border rounded-lg flex-1 w-full @md:w-auto" style="border-color:var(--w-border); background:white; min-width:0; opacity:0.6;">
+        <div class="flex items-center justify-between px-4 py-3" style="border-bottom:1px solid var(--w-border);">
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-bold">Done</span>
+            <span class="border rounded-full px-2 text-xs" style="border-color:var(--w-border); background:var(--w-fill)">0</span>
+          </div>
+        </div>
+        <div class="p-3">
+          <div class="border-2 border-dashed rounded flex flex-col items-center justify-center p-6 gap-2" style="border-color:var(--w-border); color:var(--w-muted)">
+            <p class="text-xs">No matching cards</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- No results state -->
+    <div class="mt-8">
+      <h3 class="text-sm font-bold mb-3" style="color:var(--w-muted);">Empty Search State (Search: "xyz123")</h3>
+      <div class="border-2 border-dashed rounded flex flex-col items-center justify-center p-8 gap-2" style="border-color:var(--w-border); color:var(--w-muted)">
+        <i data-lucide="search" style="width:32px;height:32px;"></i>
+        <p class="text-sm">검색 결과가 없습니다</p>
+        <button class="border rounded px-3 py-1 text-xs mt-1" style="border-color:var(--w-border); background:var(--w-fill)" disabled>Clear search</button>
+      </div>
+    </div>
+
+    <div class="screen-notes mt-6">
+      <details open>
+        <summary>Notes</summary>
+        <p>검색어 "API" + 우선순위 "High" 필터 동시 적용. AND 로직으로 교차 필터링.</p>
+        <ul>
+          <li>KANBAN-028: "API" 검색 → 제목에 "API" 포함 카드만 표시</li>
+          <li>KANBAN-029: 검색어 삭제 → 모든 카드 복원</li>
+          <li>KANBAN-030: "xyz123" → "검색 결과가 없습니다" 빈 상태</li>
+          <li>KANBAN-031: 우선순위 "High" 필터 → High만 표시</li>
+          <li>KANBAN-032: 태그 "Backend" 필터 → Backend 카드만 표시</li>
+          <li>KANBAN-033: 우선순위 + 태그 복합 필터 (AND)</li>
+          <li>KANBAN-034: 필터 해제 → 전체 복원</li>
+          <li>KANBAN-045: 검색 + 필터 동시 적용</li>
+          <li>활성 필터는 상단 칩으로 표시, 개별/전체 해제 가능</li>
+          <li>매칭 카드가 없는 칼럼은 opacity 낮춰 비활성 표현</li>
+        </ul>
+      </details>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- Screen 4: Delete Confirm — 삭제 확인 다이얼로그 -->
+<!-- ============================================================ -->
+<div id="screen-4" class="screen">
+  <div class="screen-content @container max-w-6xl mx-auto p-6">
+
+    <h2 class="text-lg font-bold mb-5" style="color:var(--w-muted); border-bottom:1px solid var(--w-border); padding-bottom:8px;">
+      Delete Confirm — 삭제 확인 다이얼로그
+    </h2>
+
+    <!-- Card Delete Dialog -->
+    <div class="mb-8">
+      <h3 class="text-sm font-bold mb-3" style="color:var(--w-muted);">Card Delete</h3>
+      <div class="rounded-lg" style="position:relative; min-height:200px; background:rgba(0,0,0,0.1); display:flex; align-items:center; justify-content:center;">
+        <div class="border rounded-lg w-full" style="border-color:var(--w-border); background:white; max-width:400px;">
+          <div class="flex items-center justify-between px-5 py-3" style="border-bottom:1px solid var(--w-border);">
+            <span class="text-sm font-bold">Delete Card</span>
+            <span style="cursor:pointer; color:var(--w-muted)"><i data-lucide="x" style="width:16px;height:16px;"></i></span>
+          </div>
+          <div class="p-5">
+            <div class="flex items-start gap-3">
+              <i data-lucide="alert-triangle" style="width:20px;height:20px;flex-shrink:0;color:var(--w-muted);"></i>
+              <p class="text-sm">"API 설계" 카드를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.</p>
+            </div>
+          </div>
+          <div class="flex justify-end gap-2 px-5 py-3" style="border-top:1px solid var(--w-border);">
+            <button class="border rounded px-3 py-1 text-sm" style="border-color:var(--w-border); background:var(--w-fill)" disabled>Cancel</button>
+            <button class="border rounded px-3 py-1 text-sm font-bold" style="border-color:var(--w-text); background:var(--w-fill)" disabled>Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Column Delete Dialog (with cards) -->
+    <div>
+      <h3 class="text-sm font-bold mb-3" style="color:var(--w-muted);">Column Delete (with cards)</h3>
+      <div class="rounded-lg" style="position:relative; min-height:220px; background:rgba(0,0,0,0.1); display:flex; align-items:center; justify-content:center;">
+        <div class="border rounded-lg w-full" style="border-color:var(--w-border); background:white; max-width:400px;">
+          <div class="flex items-center justify-between px-5 py-3" style="border-bottom:1px solid var(--w-border);">
+            <span class="text-sm font-bold">Delete Column</span>
+            <span style="cursor:pointer; color:var(--w-muted)"><i data-lucide="x" style="width:16px;height:16px;"></i></span>
+          </div>
+          <div class="p-5">
+            <div class="flex items-start gap-3">
+              <i data-lucide="alert-triangle" style="width:20px;height:20px;flex-shrink:0;color:var(--w-muted);"></i>
+              <div>
+                <p class="text-sm">"Todo" 칼럼을 삭제하시겠습니까?</p>
+                <p class="text-xs mt-1" style="color:var(--w-muted);">이 칼럼에 포함된 카드 3개도 함께 삭제됩니다. 이 작업은 되돌릴 수 없습니다.</p>
+              </div>
+            </div>
+          </div>
+          <div class="flex justify-end gap-2 px-5 py-3" style="border-top:1px solid var(--w-border);">
+            <button class="border rounded px-3 py-1 text-sm" style="border-color:var(--w-border); background:var(--w-fill)" disabled>Cancel</button>
+            <button class="border rounded px-3 py-1 text-sm font-bold" style="border-color:var(--w-text); background:var(--w-fill)" disabled>Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen-notes mt-6">
+      <details open>
+        <summary>Notes</summary>
+        <p>카드/칼럼 삭제 시 확인 다이얼로그. 두 가지 변형 표시.</p>
+        <ul>
+          <li>KANBAN-005: 카드가 있는 칼럼 삭제 → 확인 다이얼로그 (카드 수 명시)</li>
+          <li>KANBAN-044: 확인 클릭 → 칼럼+카드 모두 삭제</li>
+          <li>KANBAN-015: 카드 삭제 확인 → 카드 제거</li>
+          <li>KANBAN-016: 취소 클릭 → 원래 상태 유지</li>
+          <li>Cancel → 다이얼로그 닫힘, 원래 상태 유지</li>
+          <li>Delete → 항목 제거 후 보드 업데이트</li>
+        </ul>
+      </details>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- Screen 5: Dark Mode — 다크 테마 -->
+<!-- ============================================================ -->
+<div id="screen-5" class="screen">
+  <div class="screen-content @container max-w-6xl mx-auto p-6" style="background:#1a1a2e; border-radius:8px;">
+
+    <h2 class="text-lg font-bold mb-5" style="color:#666; border-bottom:1px solid #333; padding-bottom:8px;">
+      Dark Mode — 다크 테마
+    </h2>
+
+    <!-- App Header (dark) -->
+    <div class="flex flex-col @md:flex-row @md:items-center gap-3 mb-5">
+      <h1 class="text-base font-bold flex items-center gap-2" style="color:#ddd;">
+        <i data-lucide="kanban" style="width:20px;height:20px;color:#888;"></i>
+        <span style="color:#ddd;">Kanban Todo</span>
+      </h1>
+      <div class="flex items-center gap-2 @md:ml-auto">
+        <div class="flex items-center border rounded px-3 py-1.5 gap-2" style="border-color:#444; background:#252540;">
+          <i data-lucide="search" style="width:16px;height:16px;color:#666;"></i>
+          <input class="w-full text-sm border-0 outline-none" style="background:transparent; color:#666; min-width:140px;" placeholder="Search cards..." disabled>
+        </div>
+        <div class="border rounded px-3 py-1.5 text-sm flex items-center justify-between gap-2" style="border-color:#444; background:#252540; min-width:100px;">
+          <span style="color:#666;">Priority</span>
+          <span style="color:#666;">▾</span>
+        </div>
+        <div class="border rounded px-3 py-1.5 text-sm flex items-center justify-between gap-2" style="border-color:#444; background:#252540; min-width:80px;">
+          <span style="color:#666;">Tags</span>
+          <span style="color:#666;">▾</span>
+        </div>
+        <!-- Dark Mode Toggle (ON) -->
+        <div class="flex items-center gap-1.5">
+          <i data-lucide="sun" style="width:14px;height:14px;color:#555;"></i>
+          <div class="border rounded-full" style="width:32px;height:16px;background:#555;border-color:#666;position:relative;">
+            <div style="width:12px;height:12px;border-radius:50%;background:#ddd;border:1px solid #888;position:absolute;top:1px;right:2px;"></div>
+          </div>
+          <i data-lucide="moon" style="width:14px;height:14px;color:#aaa;"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Board (dark) -->
+    <div class="flex flex-col @md:flex-row gap-4 items-start">
+
+      <!-- Column: Todo (dark) -->
+      <div class="border rounded-lg flex-1 w-full @md:w-auto" style="border-color:#333; background:#16213e; min-width:0;">
+        <div class="flex items-center justify-between px-4 py-3" style="border-bottom:1px solid #333;">
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-bold" style="color:#ddd;">Todo</span>
+            <span class="border rounded-full px-2 text-xs" style="border-color:#444; background:#252540; color:#888;">3</span>
+          </div>
+        </div>
+        <div class="p-3 flex flex-col gap-3">
+          <div class="border rounded-lg overflow-hidden" style="border-color:#333; background:#1a1a2e;">
+            <div class="p-3">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="border rounded-full px-2 text-xs font-bold" style="border-color:#444; background:#252540; color:#ccc;">High</span>
+              </div>
+              <h3 class="text-sm font-bold" style="color:#ddd;">API 설계</h3>
+              <p class="text-xs mt-0.5" style="color:#666;">REST 엔드포인트 정의</p>
+              <div class="flex flex-wrap gap-1 mt-2">
+                <span class="border rounded-full px-2 text-xs" style="border-color:#444; background:#252540; color:#888;">Backend</span>
+              </div>
+              <div class="flex items-center gap-3 mt-2 text-xs" style="color:#555;">
+                <span class="flex items-center gap-1"><i data-lucide="calendar" style="width:12px;height:12px;color:#555;"></i> <span style="color:#555;">2026-04-01</span></span>
+                <span class="flex items-center gap-1"><i data-lucide="user" style="width:12px;height:12px;color:#555;"></i> <span style="color:#555;">김개발</span></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="border rounded-lg overflow-hidden" style="border-color:#333; background:#1a1a2e;">
+            <div class="p-3">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="border rounded-full px-2 text-xs" style="border-color:#444; background:#252540; color:#888;">Medium</span>
+              </div>
+              <h3 class="text-sm font-bold" style="color:#ddd;">DB 설계</h3>
+              <p class="text-xs mt-0.5" style="color:#666;">스키마 정의 및 마이그레이션</p>
+            </div>
+          </div>
+
+          <button class="border-2 border-dashed rounded-lg py-2 flex items-center justify-center gap-1 text-sm" style="border-color:#333; color:#555;" disabled>
+            <i data-lucide="plus" style="width:14px;height:14px;color:#555;"></i> <span style="color:#555;">Add Card</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Column: In Progress (dark) -->
+      <div class="border rounded-lg flex-1 w-full @md:w-auto" style="border-color:#333; background:#16213e; min-width:0;">
+        <div class="flex items-center justify-between px-4 py-3" style="border-bottom:1px solid #333;">
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-bold" style="color:#ddd;">In Progress</span>
+            <span class="border rounded-full px-2 text-xs" style="border-color:#444; background:#252540; color:#888;">1</span>
+          </div>
+        </div>
+        <div class="p-3 flex flex-col gap-3">
+          <div class="border rounded-lg overflow-hidden" style="border-color:#333; background:#1a1a2e;">
+            <div class="p-3">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="border rounded-full px-2 text-xs font-bold" style="border-color:#444; background:#252540; color:#ccc;">High</span>
+              </div>
+              <h3 class="text-sm font-bold" style="color:#ddd;">화면 디자인</h3>
+              <p class="text-xs mt-0.5" style="color:#666;">Figma 시안 작업</p>
+            </div>
+          </div>
+
+          <button class="border-2 border-dashed rounded-lg py-2 flex items-center justify-center gap-1 text-sm" style="border-color:#333; color:#555;" disabled>
+            <i data-lucide="plus" style="width:14px;height:14px;color:#555;"></i> <span style="color:#555;">Add Card</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Column: Done (dark) -->
+      <div class="border rounded-lg flex-1 w-full @md:w-auto" style="border-color:#333; background:#16213e; min-width:0;">
+        <div class="flex items-center justify-between px-4 py-3" style="border-bottom:1px solid #333;">
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-bold" style="color:#ddd;">Done</span>
+            <span class="border rounded-full px-2 text-xs" style="border-color:#444; background:#252540; color:#888;">1</span>
+          </div>
+        </div>
+        <div class="p-3 flex flex-col gap-3">
+          <div class="border rounded-lg overflow-hidden" style="border-color:#333; background:#1a1a2e;">
+            <div class="p-3">
+              <h3 class="text-sm font-bold" style="color:#666; text-decoration:line-through;">프로젝트 초기 설정</h3>
+              <p class="text-xs mt-0.5" style="color:#555;">Next.js + shadcn 세팅</p>
+            </div>
+          </div>
+
+          <button class="border-2 border-dashed rounded-lg py-2 flex items-center justify-center gap-1 text-sm" style="border-color:#333; color:#555;" disabled>
+            <i data-lucide="plus" style="width:14px;height:14px;color:#555;"></i> <span style="color:#555;">Add Card</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen-notes mt-6">
+      <details open>
+        <summary>Notes</summary>
+        <p>다크모드 적용 상태. 토글이 ON 위치.</p>
+        <ul>
+          <li>KANBAN-035: 토글 클릭 → 어두운 배경으로 전환</li>
+          <li>KANBAN-036: 새로고침 후 다크모드 유지 (localStorage)</li>
+          <li>KANBAN-037: 시스템 다크모드 → 첫 접속 시 자동 적용</li>
+          <li>색상 체계: 배경 #1a1a2e, 카드 #1a1a2e, 칼럼 #16213e, 테두리 #333, 텍스트 #ddd/#888</li>
+          <li>토글 위치: 오른쪽(ON), 달 아이콘 활성</li>
+        </ul>
+      </details>
+    </div>
+
+  </div>
+</div>
+
+<script>
+var currentScreen = 0;
+var screenIds = [];
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  document.getElementById('screen-' + id).classList.add('active');
+  document.querySelectorAll('nav button[id^="nav-"]').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('nav-' + id).classList.add('active');
+  currentScreen = screenIds.indexOf(id);
+}
+
+function setViewport(mode) {
+  document.body.classList.remove('viewport-mobile', 'viewport-desktop');
+  document.body.classList.add('viewport-' + mode);
+  document.querySelectorAll('.vp-toggle button').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('vp-' + mode).classList.add('active');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('nav button[id^="nav-"]').forEach(function(b) {
+    screenIds.push(parseInt(b.id.replace('nav-', '')));
+  });
+  var first = document.querySelector('nav button[id^="nav-"]');
+  if (first) first.click();
+  if (typeof lucide !== 'undefined') { lucide.createIcons(); }
+});
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'ArrowRight' && currentScreen < screenIds.length - 1) {
+    show(screenIds[currentScreen + 1]);
+  } else if (e.key === 'ArrowLeft' && currentScreen > 0) {
+    show(screenIds[currentScreen - 1]);
+  }
+});
+</script>
+<script>
+(function() {
+  var root = document.createElement('div');
+  root.id = 'wf-feedback-root';
+  document.body.appendChild(root);
+  var shadow = root.attachShadow({ mode: 'open' });
+
+  shadow.innerHTML = '<style>' +
+    ':host { all: initial; }' +
+    '.wf-toggle { position: fixed; bottom: 20px; right: 20px; z-index: 99999; ' +
+      'width: 44px; height: 44px; border-radius: 12px; border: 1px solid hsl(214.3 31.8% 91.4%); ' +
+      'background: hsl(0 0% 100%); cursor: pointer; display: flex; align-items: center; ' +
+      'justify-content: center; font-family: sans-serif; color: hsl(215.4 16.3% 46.9%); ' +
+      'box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06); ' +
+      'transition: all 0.15s ease; }' +
+    '.wf-toggle:hover { background: hsl(210 40% 96.1%); color: hsl(222.2 47.4% 11.2%); }' +
+    '.wf-toggle.active { background: hsl(222.2 47.4% 11.2%); color: hsl(210 40% 98%); ' +
+      'border-color: hsl(222.2 47.4% 11.2%); }' +
+    '.wf-toggle.active svg { stroke: hsl(210 40% 98%); }' +
+    '.wf-highlight { position: absolute; background: rgba(59,130,246,0.15); ' +
+      'border: 2px solid rgba(59,130,246,0.5); pointer-events: none; z-index: 99990; ' +
+      'border-radius: 2px; transition: all 0.1s; }' +
+    '.wf-toast { position: fixed; bottom: 72px; right: 20px; z-index: 99999; ' +
+      'background: hsl(222.2 47.4% 11.2%); color: #fff; font-family: sans-serif; ' +
+      'font-size: 13px; padding: 8px 16px; border-radius: 8px; ' +
+      'box-shadow: 0 4px 12px rgba(0,0,0,0.15); opacity: 0; ' +
+      'transition: opacity 0.2s ease; pointer-events: none; max-width: 320px; ' +
+      'word-break: break-all; }' +
+    '.wf-toast.visible { opacity: 1; }' +
+  '</style>' +
+  '<div class="wf-toggle" id="wf-toggle-btn" title="Feedback mode">' +
+    '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+      '<path d="M12 20h9"/><path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.855z"/>' +
+    '</svg>' +
+  '</div>' +
+  '<div class="wf-highlight" id="wf-highlight" style="display:none"></div>' +
+  '<div class="wf-toast" id="wf-toast"></div>';
+
+  var toggleBtn = shadow.getElementById('wf-toggle-btn');
+  var highlightEl = shadow.getElementById('wf-highlight');
+  var toastEl = shadow.getElementById('wf-toast');
+  var feedbackMode = false;
+  var toastTimer;
+
+  function showToast(text) {
+    toastEl.textContent = text;
+    toastEl.classList.add('visible');
+    clearTimeout(toastTimer);
+    toastTimer = window.setTimeout(function() {
+      toastEl.classList.remove('visible');
+    }, 2000);
+  }
+
+  function copyToClipboard(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function() {
+        showToast('Copied: ' + text);
+      }, function() {
+        fallbackCopy(text);
+      });
+    } else {
+      fallbackCopy(text);
+    }
+  }
+
+  function fallbackCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+      document.execCommand('copy');
+      showToast('Copied: ' + text);
+    } catch (_) {
+      showToast('Copy failed');
+    }
+    document.body.removeChild(ta);
+  }
+
+  toggleBtn.addEventListener('click', function() {
+    feedbackMode = !feedbackMode;
+    toggleBtn.classList.toggle('active', feedbackMode);
+    if (!feedbackMode) {
+      highlightEl.style.display = 'none';
+    }
+  });
+
+  function buildSelector(el) {
+    var parts = [];
+    var cur = el;
+    while (cur && cur !== document.body && cur !== document.documentElement) {
+      if (cur.id) {
+        parts.unshift('#' + cur.id);
+        break;
+      }
+      var tag = cur.tagName;
+      var parent = cur.parentElement;
+      if (parent) {
+        var siblings = Array.from(parent.children);
+        var idx = siblings.indexOf(cur) + 1;
+        parts.unshift(tag + ':nth-child(' + idx + ')');
+      } else {
+        parts.unshift(tag);
+      }
+      cur = parent;
+    }
+    return parts.join(' > ');
+  }
+
+  function getScreenId() {
+    var active = document.querySelector('.screen.active');
+    return active ? active.id.replace('screen-', '') : 'unknown';
+  }
+
+  document.addEventListener('mousemove', function(e) {
+    if (!feedbackMode) return;
+    var target = e.target;
+    if (!target || target.closest('#wf-feedback-root') || target.closest('nav')) {
+      highlightEl.style.display = 'none';
+      return;
+    }
+    var screen = target.closest('.screen.active');
+    if (!screen) { highlightEl.style.display = 'none'; return; }
+    var rect = target.getBoundingClientRect();
+    highlightEl.style.display = 'block';
+    highlightEl.style.top = (rect.top + window.scrollY) + 'px';
+    highlightEl.style.left = (rect.left + window.scrollX) + 'px';
+    highlightEl.style.width = rect.width + 'px';
+    highlightEl.style.height = rect.height + 'px';
+  });
+
+  document.addEventListener('click', function(e) {
+    if (!feedbackMode) return;
+    var target = e.target;
+    if (!target || target.closest('#wf-feedback-root')) return;
+    if (target.closest('nav')) return;
+    var screen = target.closest('.screen.active');
+    if (!screen) return;
+    e.preventDefault();
+    e.stopPropagation();
+    var selector = buildSelector(target);
+    var path = '[screen-' + getScreenId() + ' > ' + selector + ']';
+    copyToClipboard(path);
+  }, true);
+
+})();
+</script>
+</body>
+</html>
